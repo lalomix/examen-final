@@ -65,8 +65,9 @@ pipeline {
                     // Usamos --network host para que ZAP pueda ver 'localhost:5000' de la máquina virtual
                     // zap-baseline.py es ideal para escaneos rápidos
                     sh """
+                    touch zap_report.html && chmod 777 zap_report.html
                     docker run --rm --network host -v \$(pwd):/zap/wrk/:rw -t zaproxy/zap-stable zap-baseline.py \
-                    -t http://127.0.0.1:5000 \
+                    -t http://10.0.0.183:5000 \
                     -r zap_report.html \
                     || true
                     """
