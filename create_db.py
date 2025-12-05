@@ -1,11 +1,13 @@
 import sqlite3
-import hashlib
+from werkzeug.security import generate_password_hash
 
-# Conexión a la base de datos (se creará automáticamente si no existe)
+# Conexión a la base de datos
 conn = sqlite3.connect('example.db')
-
-# Crear un cursor
 c = conn.cursor()
+
+# Limpiar tablas si existen para regenerar con datos seguros
+c.execute('DROP TABLE IF EXISTS comments')
+c.execute('DROP TABLE IF EXISTS users')
 
 # Crear la tabla de usuarios
 c.execute('''
@@ -17,19 +19,16 @@ c.execute('''
     )
 ''')
 
-# Función para hash de contraseñas
+# Insertar usuarios con HASH SEGURO (Werkzeug)
+# Esto soluciona la vulnerabilidad de Hashing Débil
+admin_pass = generate_password_hash('password')
+user_pass = generate_password_hash('password')
 
-
-def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
-
-
-# Insertar un usuario de prueba (las contraseñas están en SHA256 de 'password')
 c.execute('''
     INSERT INTO users (username, password, role) VALUES
     ('admin', ?, 'admin'),
     ('user', ?, 'user')
-''', (hash_password('password'), hash_password('password')))
+''', (admin_pass, user_pass))
 
 # Crear la tabla de comentarios
 c.execute('''
@@ -41,8 +40,7 @@ c.execute('''
     )
 ''')
 
-# Guardar los cambios y cerrar la conexión
 conn.commit()
 conn.close()
 
-print("Base de datos y tablas creadas con éxito.")
+print("Base de datos creada exitosamente con contraseñas seguras.")
